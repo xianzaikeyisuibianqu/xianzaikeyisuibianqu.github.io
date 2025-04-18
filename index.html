@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>弹跳小球</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+        }
+        
+        .title {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: Arial, sans-serif;
+            font-size: 80px;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5),
+                         0 0 20px rgba(255, 182, 193, 0.5),
+                         0 0 30px rgba(147, 112, 219, 0.5);
+            animation: titleFloat 3s ease-in-out infinite;
+        }
+        
+        .ball {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            animation: bounce 1s linear infinite;
+        }
+        
+        #ball1 { background-color: #ff0000; left: 100px; top: 100px; }
+        #ball2 { background-color: #ffff00; left: 300px; top: 100px; }
+        #ball3 { background-color: #0000ff; left: 500px; top: 100px; }
+        
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-100px);
+            }
+        }
+
+        @keyframes titleFloat {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.2); }
+        }
+    </style>
+</head>
+<body>
+    <h1 class="title">你 HAO 呀~~</h1>
+    <div id="ball1" class="ball"></div>
+    <div id="ball2" class="ball"></div>
+    <div id="ball3" class="ball"></div>
+
+    <script>
+        // 添加小球弹跳动画
+        const balls = document.querySelectorAll('.ball');
+        
+        function animate() {
+            balls.forEach(ball => {
+                const rect = ball.getBoundingClientRect();
+                
+                if (rect.top <= 0 || rect.bottom >= window.innerHeight) {
+                    ball.style.transform = `scale(${Math.random() * (0.8 - 1.2) + 1.2})`;
+                }
+            });
+            
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        // 窗口大小改变时刷新动画
+        window.addEventListener('resize', () => {
+            balls.forEach(ball => {
+                ball.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body>
+</html>
