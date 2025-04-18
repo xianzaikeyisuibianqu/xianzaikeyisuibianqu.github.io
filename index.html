@@ -23,17 +23,63 @@
             animation: titleFloat 3s ease-in-out infinite;
         }
         
-        .ball {
+        .game-container {
             position: absolute;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            animation: bounce 1s linear infinite;
+            top: 60%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
-        
-        #ball1 { background-color: #ff0000; left: 100px; top: 100px; }
-        #ball2 { background-color: #ffff00; left: 300px; top: 100px; }
-        #ball3 { background-color: #0000ff; left: 500px; top: 100px; }
+
+        #board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-gap: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+
+        .cell {
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .cell:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.05);
+        }
+
+        .controls {
+            margin-top: 20px;
+            text-align: center;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
         
         @keyframes bounce {
             0%, 100% {
@@ -54,34 +100,87 @@
     <h1 class="title">你 HAO 呀~~</h1>
     <h1 class="title">你 HAO 呀~~</h1>
     <h1 class="title">你 HAO 呀~~</h1>
-    <div id="ball1" class="ball"></div>
-    <div id="ball2" class="ball"></div>
-    <div id="ball3" class="ball"></div>
+    <div class="game-container">
+        <div id="board"></div>
+        <div class="controls">
+            <div id="status">当前玩家：X</div>
+            <button onclick="resetGame()">重新开始</button>
+        </div>
+    </div>
 
     <script>
-        // 添加小球弹跳动画
-        const balls = document.querySelectorAll('.ball');
-        
-        function animate() {
-            balls.forEach(ball => {
-                const rect = ball.getBoundingClientRect();
-                
-                if (rect.top <= 0 || rect.bottom >= window.innerHeight) {
-                    ball.style.transform = `scale(${Math.random() * (0.8 - 1.2) + 1.2})`;
-                }
-            });
+        let currentPlayer = 'X';
+        let gameBoard = ['', '', '', '', '', '', '', '', ''];
+        let gameActive = true;
+
+        function initBoard() {
+            const board = document.getElementById('board');
+            board.innerHTML = '';
             
-            requestAnimationFrame(animate);
+            gameBoard.forEach((cell, index) => {
+                const cellElement = document.createElement('div');
+                cellElement.classList.add('cell');
+                cellElement.setAttribute('data-index', index);
+                cellElement.addEventListener('click', () => handleCellClick(index));
+                board.appendChild(cellElement);
+            });
         }
 
-        animate();
+        function handleCellClick(index) {
+            if (!gameActive || gameBoard[index] !== '') return;
+            
+            gameBoard[index] = currentPlayer;
+            updateBoard();
+            checkWinner();
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            document.getElementById('status').textContent = `当前玩家：${currentPlayer}`;
+        }
 
-        // 窗口大小改变时刷新动画
-        window.addEventListener('resize', () => {
-            balls.forEach(ball => {
-                ball.style.transform = 'translateY(0)';
+        function updateBoard() {
+            document.querySelectorAll('.cell').forEach((cell, index) => {
+                cell.textContent = gameBoard[index];
+                if (gameBoard[index] === 'X') {
+                    cell.style.color = '#FF69B4';
+                    cell.style.textShadow = '0 0 10px rgba(255,105,180,0.5)';
+                } else if (gameBoard[index] === 'O') {
+                    cell.style.color = '#7B68EE';
+                    cell.style.textShadow = '0 0 10px rgba(123,104,238,0.5)';
+                }
             });
-        });
+        }
+
+        function checkWinner() {
+            const winPatterns = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                [0, 4, 8], [2, 4, 6]
+            ];
+
+            for (const pattern of winPatterns) {
+                const [a, b, c] = pattern;
+                if (gameBoard[a] && gameBoard[a] === gameBoard[b] && gameBoard[a] === gameBoard[c]) {
+                    gameActive = false;
+                    document.getElementById('status').textContent = `玩家 ${gameBoard[a]} 获胜！`;
+                    return;
+                }
+            }
+
+            if (!gameBoard.includes('')) {
+                gameActive = false;
+                document.getElementById('status').textContent = '平局！';
+            }
+        }
+
+        function resetGame() {
+            gameBoard = ['', '', '', '', '', '', '', '', ''];
+            gameActive = true;
+            currentPlayer = 'X';
+            document.getElementById('status').textContent = '当前玩家：X';
+            initBoard();
+        }
+
+        // 初始化游戏
+        initBoard();
     </script>
 </body>
 </html>
